@@ -1,0 +1,18 @@
+name: tony_assistant
+description: Jarvis-like AI Assistant
+version: 1.0.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^0.13.5
+  speech_to_text: ^6.3.0
+  flutter_tts: ^3.6.3
+  android_intent: ^2.0.0
+  foreground_service: ^2.0.0
+
+flutter:
+  uses-material-design: true
