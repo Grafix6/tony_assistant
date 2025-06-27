@@ -1,0 +1,48 @@
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+import 'openai_service.dart';
+import 'tts_service.dart';
+import 'device_control.dart';
+
+class BackgroundListener {
+  final SpeechToText _speech = SpeechToText();
+  final OpenAIService _openAI = OpenAIService();
+  final TTSService _tts = TTSService();
+  
+  Future<void> init() async {
+    await _speech.initialize();
+    _speech.listen(
+      onResult: _onSpeechResult,
+      listenFor: const Duration(minutes: 30),
+      pauseFor: const Duration(seconds: 3),
+      listenMode: ListenMode.confirmation,
+    );
+  }
+
+  void _onSpeechResult(SpeechRecognitionResult result) {
+    if (result.finalResult) {
+      if(result.recognizedWords.toLowerCase().contains("tony")) {
+        String command = result.recognizedWords.replaceAll("tony", "").trim();
+        _processCommand(command);
+      }
+    }
+  }
+  
+  void _processCommand(String command) async {
+    // Local commands
+    final localCommands = {
+      "open whatsapp": () => DeviceControl.openApp("com.whatsapp"),
+      "call mom": () => DeviceControl.callNumber("+918521473190"),
+      "good morning": () => _tts.speak("Good morning sir!", emotion: "happy"),
+    };
+    
+    if(localCommands.containsKey(command.toLowerCase())) {
+      localCommands[command]!();
+      return;
+    }
+    
+    // AI commands
+    String response = await _openAI.getResponse(command);
+    _tts.speak(response);
+  }
+}
